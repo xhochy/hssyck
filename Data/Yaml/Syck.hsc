@@ -7,6 +7,8 @@ module Data.Yaml.Syck (
     YamlNode(..), YamlElem(..), YamlAnchor(..),
     tagNode, nilNode, mkNode, mkTagNode, mkTagStrNode, SYMID,
     packBuf, unpackBuf,
+    fromStringNode,fromMapNode,
+    emapEntryVal,
 ) where
 
 import Control.Exception (bracket)
@@ -22,9 +24,11 @@ import Foreign.Marshal.Utils
 import Foreign.Storable
 import System.IO.Unsafe
 import GHC.Ptr (Ptr(..))
+import qualified Control.Monad
 import qualified Data.HashTable as Hash
 import qualified Data.ByteString.Char8 as Buf
 import Data.ByteString.UTF8 (fromString, toString)
+import qualified Data.List as List
 import Data.ByteString.Char8 (useAsCStringLen, useAsCString)
 import Data.ByteString (packCString, packCStringLen)
 
@@ -59,6 +63,25 @@ data YamlElem
     | EStr !Buf
     | ENil
     deriving (Show, Ord, Eq, Typeable, Data)
+
+-- BEGIN Custom Helper functions --
+-- Should be moved into something like Data.Yaml.Syck.Utils
+
+fromStringNode n = case (n_elem n) of
+    EStr s -> Just (unpackBuf s)
+    _ -> Nothing
+
+fromMapNode n = case (n_elem n) of
+    EMap m -> Just m
+    _ -> Nothing
+
+-- | Get a entry with a given key out of a EMap
+-- emapEntry :: EMap [(YamlNode, YamlNode)] -> String -> Maybe YamlNode
+emapEntryVal n mkey = Control.Monad.liftM snd ((fromMapNode n) >>= (List.find keyMatch))
+    -- Control.Monad.liftM snd (List.find keyMatch (fromMapNode n))
+    where keyMatch (k, v) = maybe False (\x -> x == mkey) (fromStringNode k)
+
+-- END Custom Helper functions --
 
 type SyckNode = Ptr ()
 type SyckParser = Ptr ()
