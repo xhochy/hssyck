@@ -36,6 +36,7 @@ Library
     exposed-modules:
         Data.Yaml.Syck
         Data.Yaml.SyckUtils
+
     ghc-options: -funbox-strict-fields
     extensions: ForeignFunctionInterface, MagicHash,
                 DeriveDataTypeable, TypeSynonymInstances, PatternGuards, RecursiveDo
