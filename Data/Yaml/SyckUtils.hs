@@ -14,6 +14,12 @@ fromStringNode n = case (n_elem n) of
     EStr s -> Just (unpackBuf s)
     _ -> Nothing
 
+-- |Convert a YamlNode containing a sequence into a normal array
+fromSeqNode :: YamlNode -> Maybe [YamlNode]
+fromSeqNode n = case (n_elem n) of
+    ESeq s -> Just s
+    _ -> Nothing
+
 -- |Convert a YamlNode containing a map into a array with (key,value)-tuples
 fromMapNode :: YamlNode -> Maybe [(YamlNode, YamlNode)]
 fromMapNode n = case (n_elem n) of
