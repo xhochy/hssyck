@@ -1,11 +1,12 @@
 -- |Utility functions for easier handling of YAML files.
 module Data.Yaml.SyckUtils (
-    fromStringNode,fromMapNode,
-    emapEntryVal,
+    fromStringNode,fromMapNode, fromSeqNode,
+    emapEntryVal, emapKeys
 ) where
 
 import qualified Control.Monad
 import qualified Data.List as List
+import Data.Maybe (mapMaybe)
 import Data.Yaml.Syck
 
 -- |Convert a YamlNode containing a String into a normal String
@@ -31,3 +32,7 @@ emapEntryVal :: YamlNode -> String -> Maybe YamlNode
 emapEntryVal n mkey = Control.Monad.liftM snd ((fromMapNode n) >>= (List.find keyMatch))
     where keyMatch (k, v) = maybe False (\x -> x == mkey) (fromStringNode k)
 
+-- |Get all Keys of a YamlNode
+emapKeys :: YamlNode -> [String]
+emapKeys n = mapMaybe fromStringNode keys
+    where keys = maybe [] (map fst) (fromMapNode n)
